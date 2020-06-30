@@ -1,0 +1,41 @@
+{
+  "name": "adaptcms/fieldimage",
+  "description": "Adaptcms FieldImage",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Charles Page",
+      "email": "charliepage88@gmail.com",
+      "homepage": "https://www.adaptcms.com/packages/adaptcms/fieldimage"
+    }
+  ],
+  "homepage": "https://github.com/adaptcms/fieldimage",
+  "keywords": [
+    "Laravel",
+    "Adaptcms",
+    "FieldImage"
+  ],
+  "require": {
+    "illuminate/support": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Adaptcms\\FieldImage\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Adaptcms\\FieldImage\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Adaptcms\\FieldImage\\FieldImageServiceProvider"
+      ],
+      "aliases": {
+        "FieldImage": "Adaptcms\\FieldImage\\Facades\\FieldImage"
+      }
+    }
+  }
+}
