@@ -5,7 +5,7 @@ namespace Adaptcms\FieldImage\Traits;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
-use Adaptcms\Modules\Models\ModuleField;
+use Adaptcms\Base\Models\PackageField;
 
 use Artisan;
 use DB;
@@ -16,20 +16,20 @@ trait HasImageMigrations
   /**
   * Create Column Migration
   *
-  * @param ModuleField $moduleField
+  * @param PackageField $packageField
   *
   * @return void
   */
-  public function createColumnMigration(ModuleField $moduleField)
+  public function createColumnMigration(PackageField $packageField)
   {
-    // get module
-    $module = $moduleField->module;
+    // get package
+    $package = $packageField->package;
 
     // get model class
-    $model = $module->customModel();
+    $model = $package->customModel();
 
     // get model file
-    $contents = Storage::disk('modules')->get($module->name . '.php');
+    $contents = Storage::disk('modules')->get($package->name . '.php');
 
     $find = [];
     $replace = [];
@@ -41,7 +41,7 @@ trait HasImageMigrations
     }
 
     // add a use call for trait if not there
-    if (!strstr($contents, 'FieldImageTrait')) {
+    if (!strstr($contents, 'FieldImageTrait') && !strstr($contents, 'FieldFileTrait') && !strstr($contents, 'InteractsWithMedia')) {
       $traitClass = '\\Adaptcms\\FieldImage\\Traits\\FieldImageTrait';
 
       $find[] = '/* use calls */';
@@ -52,23 +52,23 @@ trait HasImageMigrations
     if (!empty($find) && !empty($replace)) {
       $contents = str_replace($find, $replace, $contents);
 
-      Storage::disk('modules')->put($module->name . '.php', $contents);
+      Storage::disk('modules')->put($package->name . '.php', $contents);
     }
 
     // get skeleton contents
     $contents = Storage::disk('packages')->get('Adaptcms/Fields/src/Skeletons/Migrations/CreateColumn.php');
 
     // get placeholder replacements
-    $ucTable = Str::plural($module->name);
-    $lcTable = Str::plural(Str::snake($module->name));
-    $ucColumn = Str::studly($moduleField->column_name);
-    $lcColumn = Str::snake($moduleField->column_name);
+    $ucTable = Str::plural($package->name);
+    $lcTable = Str::plural(Str::snake($package->name));
+    $ucColumn = Str::studly($packageField->column_name);
+    $lcColumn = Str::snake($packageField->column_name);
 
     // get attached field with migration command
-    if ($moduleField->meta['mode'] === 'multiple') {
-      $migrationCommand = $moduleField->field->fieldType()->multipleImagesMigrationCommand();
+    if ($packageField->meta['mode'] === 'multiple') {
+      $migrationCommand = $packageField->field->fieldType()->multipleImagesMigrationCommand();
     } else {
-      $migrationCommand = $moduleField->field->fieldType()->singleImageMigrationCommand();
+      $migrationCommand = $packageField->field->fieldType()->singleImageMigrationCommand();
     }
 
     $migrationCommand = str_replace(':columnName', $lcColumn, $migrationCommand);
@@ -103,24 +103,24 @@ trait HasImageMigrations
   /**
   * Rename Column Migration
   *
-  * @param ModuleField $moduleField
+  * @param PackageField $packageField
   *
   * @return void
   */
-  public function renameColumnMigration(ModuleField $moduleField)
+  public function renameColumnMigration(PackageField $packageField)
   {
     // get skeleton contents
     $contents = Storage::disk('packages')->get('Adaptcms/Fields/src/Skeletons/Migrations/RenameColumn.php');
 
-    // get module
-    $module = $moduleField->module;
+    // get package
+    $package = $packageField->package;
 
     // replace placeholders with table & column names
-    $oldColumnName = $moduleField->getOriginal('column_name');
-    $newColumName = $moduleField->column_name;
+    $oldColumnName = $packageField->getOriginal('column_name');
+    $newColumName = $packageField->column_name;
 
-    $ucTable = Str::plural($module->name);
-    $lcTable = Str::plural(Str::snake($module->name));
+    $ucTable = Str::plural($package->name);
+    $lcTable = Str::plural(Str::snake($package->name));
     $ucColumn = Str::studly($oldColumnName);
     $oldColumn = Str::snake($oldColumnName);
     $newColumn = Str::snake($newColumName);
@@ -153,20 +153,20 @@ trait HasImageMigrations
   /**
   * Drop Column Migration
   *
-  * ModuleField $moduleField
+  * PackageField $packageField
   *
   * @return void
   */
-  public function dropColumnMigration(ModuleField $moduleField)
+  public function dropColumnMigration(PackageField $packageField)
   {
-    // get module
-    $module = $moduleField->module;
+    // get package
+    $package = $packageField->package;
 
     // get model class
-    $model = $module->customModel();
+    $model = $package->customModel();
 
     // get model file
-    $contents = Storage::disk('modules')->get($module->name . '.php');
+    $contents = Storage::disk('modules')->get($package->name . '.php');
 
     $find = [];
     $replace = [];
@@ -189,17 +189,17 @@ trait HasImageMigrations
     if (!empty($find) && !empty($replace)) {
       $contents = str_replace($find, $replace, $contents);
 
-      Storage::disk('modules')->put($module->name . '.php', $contents);
+      Storage::disk('modules')->put($package->name . '.php', $contents);
     }
 
     // get skeleton contents
     $contents = Storage::disk('packages')->get('Adaptcms/Fields/src/Skeletons/Migrations/DropColumn.php');
 
     // replace placeholders with table & column names
-    $ucTable = Str::plural($module->name);
-    $lcTable = Str::plural(Str::snake($module->name));
-    $ucColumn = Str::studly($moduleField->column_name);
-    $lcColumn = Str::snake($moduleField->column_name);
+    $ucTable = Str::plural($package->name);
+    $lcTable = Str::plural(Str::snake($package->name));
+    $ucColumn = Str::studly($packageField->column_name);
+    $lcColumn = Str::snake($packageField->column_name);
 
     $find = [
       ':ucTable',
@@ -224,7 +224,7 @@ trait HasImageMigrations
     $this->makeMigrations();
 
     // remove media attached
-    DB::table('media')->where('model_type', get_class($module->customModel()))->delete();
+    DB::table('media')->where('model_type', get_class($package->customModel()))->delete();
   }
 
   /**

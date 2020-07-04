@@ -7,31 +7,11 @@ use Illuminate\Support\Str;
 
 use Adaptcms\Fields\FieldType;
 use Adaptcms\FieldImage\Traits\HasImageMigrations;
-use Adaptcms\Modules\Models\ModuleField;
+use Adaptcms\Base\Models\PackageField;
 
 class FieldImage extends FieldType
 {
   use HasImageMigrations;
-
-  /**
-  * Rules applied when record is being stored with a post type.
-  *
-  * @var array
-  */
-  public $storeRules = [
-    //
-    // 'mimes:jpeg,jpg,png,gif,bmp,webp,svg'
-  ];
-
-  /**
-  * Rules applied when record is being updated with a post type.
-  *
-  * @var array
-  */
-  public $updateRules = [
-    //
-    // 'mimes:jpeg,jpg,png,gif,bmp,webp,svg'
-  ];
 
   /**
   * @var boolean
@@ -59,41 +39,17 @@ class FieldImage extends FieldType
   }
 
   /**
-  * Get Value
-  *
-  * @param mixed $value
-  *
-  * @return mixed
-  */
-  public function getValue($value)
-  {
-    return $value;
-  }
-
-  /**
-  * Set Value
-  *
-  * @param mixed $value
-  *
-  * @return void
-  */
-  public function setValue($value)
-  {
-    return $value;
-  }
-
-  /**
   * Format Name
   *
-  * @param ModuleField $moduleField
+  * @param PackageField $packageField
   *
   * @return string
   */
-  public function formatName(ModuleField $moduleField)
+  public function formatName(PackageField $packageField)
   {
-    $name = Str::singular($moduleField->name);
-    if ($moduleField->meta['mode'] === 'multiple') {
-      $name = Str::plural($moduleField->name);
+    $name = Str::singular($packageField->name);
+    if ($packageField->meta['mode'] === 'multiple') {
+      $name = Str::plural($packageField->name);
     }
 
     return $name;
@@ -102,48 +58,36 @@ class FieldImage extends FieldType
   /**
   * Format Column Name
   *
-  * @param ModuleField $moduleField
+  * @param PackageField $packageField
   *
   * @return string
   */
-  public function formatColumnName(ModuleField $moduleField)
+  public function formatColumnName(PackageField $packageField)
   {
-    $name = Str::singular($moduleField->name);
-    if ($moduleField->meta['mode'] === 'multiple') {
-      $name = Str::plural($moduleField->name);
+    $name = Str::singular($packageField->name);
+    if ($packageField->meta['mode'] === 'multiple') {
+      $name = Str::plural($packageField->name);
     }
 
     return strtolower($name);
   }
 
   /**
-  * After Store
-  *
-  * @param ModuleField $moduleField
-  *
-  * @return void
-  */
-  // public function afterStore(ModuleField $moduleField)
-  // {
-  //
-  // }
-
-  /**
   * With Form Meta
   *
-  * @param Request     $request
-  * @param ModuleField $moduleField
+  * @param Request      $request
+  * @param PackageField $packageField
   *
   * @return array
   */
-  public function withFormMeta(Request $request, ModuleField $moduleField)
+  public function withFormMeta(Request $request, PackageField $packageField)
   {
     $meta = [];
 
     // set media info to view
-    $columnName = $moduleField->column_name;
+    $columnName = $packageField->column_name;
 
-    $customModel = $moduleField->module->customModel();
+    $customModel = $packageField->package->customModel();
 
     $routeParams = $request->route()->parameters();
 
@@ -159,60 +103,47 @@ class FieldImage extends FieldType
   }
 
   /**
-  * With Loaded Relationships
-  *
-  * @param Model $model
-  * @param ModuleField $moduleField
-  *
-  * @return Model
-  */
-  // public function withLoadedRelationships($model, ModuleField $moduleField)
-  // {
-  //   return $model;
-  // }
-
-  /**
   * After Model Store
   *
-  * @param Model       $model
-  * @param Request     $request
-  * @param ModuleField $moduleField
+  * @param Model        $model
+  * @param Request      $request
+  * @param PackageField $packageField
   *
   * @return void
   */
-  public function afterModelStore($model, Request $request, ModuleField $moduleField)
+  public function afterModelStore($model, Request $request, PackageField $packageField)
   {
-    $this->afterModelSave($model, $request, $moduleField);
+    $this->afterModelSave($model, $request, $packageField);
   }
 
   /**
   * After Model Update
   *
-  * @param Model       $model
-  * @param Request     $request
-  * @param ModuleField $moduleField
+  * @param Model        $model
+  * @param Request      $request
+  * @param PackageField $packageField
   *
   * @return void
   */
-  public function afterModelUpdate($model, Request $request, ModuleField $moduleField)
+  public function afterModelUpdate($model, Request $request, PackageField $packageField)
   {
-    $this->afterModelSave($model, $request, $moduleField);
+    $this->afterModelSave($model, $request, $packageField);
   }
 
   /**
   * After Model Save
   *
-  * @param Model       $model
-  * @param Request     $request
-  * @param ModuleField $moduleField
+  * @param Model        $model
+  * @param Request      $request
+  * @param PackageField $packageField
   *
   * @return void
   */
-  public function afterModelSave($model, Request $request, ModuleField $moduleField)
+  public function afterModelSave($model, Request $request, PackageField $packageField)
   {
     // init vars
-    $columnName = $moduleField->column_name;
-    $isMultiple = ($moduleField->meta['mode'] === 'multiple');
+    $columnName = $packageField->column_name;
+    $isMultiple = ($packageField->meta['mode'] === 'multiple');
 
     if ($isMultiple) {
       $values = is_null($model->$columnName) ? [] : $model->$columnName;
