@@ -5,13 +5,32 @@ namespace Adaptcms\FieldImage\Field;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+use Adaptcms\Base\Models\PackageField;
 use Adaptcms\Fields\FieldType;
 use Adaptcms\FieldImage\Traits\HasImageMigrations;
-use Adaptcms\Base\Models\PackageField;
 
 class FieldImage extends FieldType
 {
   use HasImageMigrations;
+
+  /**
+  * @var array
+  */
+  public $defaultSettings = [
+    'options' => [
+      'is_sortable'        => false,
+      'is_searchable'      => false,
+      'is_required_create' => false,
+      'is_required_edit'   => false
+    ],
+    'action_rules' => [
+      'index'  => false,
+      'create' => true,
+      'edit'   => true,
+      'show'   => true,
+      'search' => false
+    ]
+  ];
 
   /**
   * @var boolean
@@ -219,5 +238,17 @@ class FieldImage extends FieldType
         $model->save();
       }
     }
+  }
+
+  /**
+  * Create Field Rules
+  *
+  * @return array
+  */
+  public function createFieldRules()
+  {
+    return [
+      'meta.mode' => 'required'
+    ];
   }
 }
