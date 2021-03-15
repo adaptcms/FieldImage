@@ -234,6 +234,8 @@ trait HasImageMigrations
   */
   public function makeMigrations()
   {
-    Artisan::call('migrate');
+    Artisan::call('migrate', [
+      '--force' => true
+    ]);
   }
 }
